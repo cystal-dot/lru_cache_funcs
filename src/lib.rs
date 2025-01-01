@@ -1,10 +1,12 @@
+use lru::LruCache;
 use pgrx::{prelude::*, Json};
-use std::{collections::HashMap, sync::Mutex};
+use std::{num::NonZero, sync::Mutex};
 
 pgrx::pg_module_magic!();
 
 lazy_static::lazy_static! {
-    static ref QUERY_CACHE: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
+    static ref CACHE_SIZE: usize = 100;
+    static ref QUERY_CACHE: Mutex<LruCache<String, String>> = Mutex::new(LruCache::new(NonZero::new(*CACHE_SIZE).unwrap()));
 }
 
 #[pg_extern]
@@ -26,7 +28,7 @@ fn execute_with_cache(query: &str) -> String {
                         e.to_string()
                     }
                 };
-            unlocked_cache.insert(query.to_string(), query_result.clone());
+            unlocked_cache.put(query.to_string(), query_result.clone());
             query_result
         }
     };
