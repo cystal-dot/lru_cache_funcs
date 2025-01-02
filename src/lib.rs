@@ -42,3 +42,20 @@ fn clear_cache() -> &'static str {
     cache.clear();
     "Query cache cleared."
 }
+
+#[pg_extern]
+fn set_cache_size(size_str: &str) -> &'static str {
+    let size = match size_str.parse::<i32>() {
+        Ok(s) => s,
+        Err(_) => panic!("Error: Cache size must be a number."), // 数値チェック
+    };
+
+    // 0以下の場合は更新しない
+    if size <= 0 {
+        panic!("Error: Cache size must be greater than 0.");
+    }
+
+    let mut cache = QUERY_CACHE.lock().unwrap();
+    *cache = LruCache::new(NonZero::new(size as usize).unwrap());
+    "Cache size updated."
+}
