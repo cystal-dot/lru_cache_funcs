@@ -39,3 +39,12 @@ lru_cache_funcs=# SELECT clear_cache();
 (1 row)
 
 ```
+
+キャッシュサイズを変更する
+```
+lru_cache_funcs=# select set_cache_size('10');
+   set_cache_size    
+---------------------
+ Cache size updated.
+(1 row)
+```
